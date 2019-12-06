@@ -5,6 +5,10 @@ web-console for monitoring sunflower core
 
 connect to server with your access token
 
+```javascript
+const socket = io.connect("http://localhost:8081?token=abc");
+```
+
 1. successful output (console-out event)
 
 ```json
