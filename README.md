@@ -1,9 +1,7 @@
 # web-console
 web-console for monitoring sunflower core
 
-## socketIO response
-
-connect to server with your access token
+- connect to server with your access token
 
 ```javascript
 let webConsole = new (require('./index.js'))
