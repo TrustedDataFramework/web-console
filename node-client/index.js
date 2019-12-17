@@ -1,41 +1,63 @@
-const program = require('commander')
-<<<<<<< HEAD
 const io = require('socket.io-client')
 const keccak256 = require('./sha3').keccak256;
-=======
-const path = require('path')
+const events = require('./events')
+const OK = 200
+const ERROR = 500
+const url = require('url')
 
->>>>>>> 75d22e26fc36eeecc258b5ca72a9b3d7438403da
-program
-    .option("-f --token_file <string>", "token file")
-program.parse(process.argv)
-<<<<<<< HEAD
-const tokenFile = require(program.token_file)
-let port = tokenFile.port;
-let token = tokenFile.token;
-console.log("111");
+class WebConsole {
+    static COMMANDS = events.COMMANDS
+    static EVENTS = events.EVENTS
 
-let token256 = keccak256(Buffer.from(token, 'ascii'))
-const socket = io.connect("http://localhost:"+port+"?token="+token256);
-console.log("222");
-socket.on('console-out', function(data) {
-    if(data.code == 200){
-        console.log(data.output)
+    WebConsole(){
+    
     }
-    if(data.code == 500){
-        console.error(data.error)
-    }
-});
 
-function test(){
-socket.emit('console-in', {
-    input: "console.log(\"hello world\")"
-})
+    connect(host, port , token){
+        this.token = token
+    
+        this.socket = io.connect(`http://${host}:${port}?token=${this._hashRaw()}`);
+        this.socket.on(events.EVENTS.LOG, function(data) {
+            if(data.code == OK){
+                console.log(data.info)
+                return
+            }
+            if(data.code == ERROR){
+                console.error(data.error)
+                return
+            }
+        });
+    }
+
+    shutdown(){
+        this.socket.emit(events.COMMANDS.SHUTDOWN, this._buildPayload())
+    }
+
+    _buildPayload(){
+        const salt = Date.now()
+        return {
+            token: this._hashWithSalt(salt),
+            createdAt: salt
+        }
+    }
+
+    _hashWithSalt(salt){
+        return keccak256(Buffer.from(this.token + salt, 'ascii'))
+    }
+
+    _hashRaw(){
+        return keccak256(Buffer.from(this.token, 'ascii'))
+    }
+
+    getCommands(){
+        return WebConsole.COMMANDS
+    }
+
+    getEvents(){
+        return WebConsole.EVENTS
+    }
 }
 
-=======
-// convert to absolute path, avoid require node_modules
-program.tokenFile = path.resolve(program.tokenFile)
->>>>>>> 75d22e26fc36eeecc258b5ca72a9b3d7438403da
+module.exports = WebConsole;
 
-setTimeout(test, 5000);
+
