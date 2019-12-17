@@ -3,7 +3,6 @@ const keccak256 = require('./sha3').keccak256;
 const events = require('./events')
 const OK = 200
 const ERROR = 500
-const url = require('url')
 
 class WebConsole {
     static COMMANDS = events.COMMANDS
